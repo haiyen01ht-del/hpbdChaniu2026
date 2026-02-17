@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>For Trang ❤️</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #ffd6e7; /* hồng nhạt */
+    color: #5a2a41;
+    text-align: center;
+    overflow-x: hidden;
+}
+
+/* ================= GAME ================= */
+
+#gameSection {
+    padding: 20px;
+}
+
+h1 {
+    margin-top: 20px;
+}
+
+.subtitle {
+    margin-bottom: 10px;
+    font-style: italic;
+}
+
+.board {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.row-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.hint {
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.row {
+    display: flex;
+    gap: 6px;
+}
+
+input {
+    width: 45px;
+    height: 45px;
+    font-size: 18px;
+    text-align: center;
+    border-radius: 8px;
+    border: 2px solid #ff9ecb;
+    background: #fff0f6;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+@media (min-width: 768px) {
+    input {
+        width: 55px;
+        height: 55px;
+        font-size: 20px;
+    }
+}
+
+.correct input {
+    background: #ff85b3;
+    color: white;
+}
+
+button {
+    margin-top: 20px;
+    padding: 12px 30px;
+    border-radius: 20px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    background: #ff85b3;
+    color: white;
+}
+
+/* ================= LETTER ================= */
+
+#letterSection {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #fff0f6;
+    color: #5a2a41;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.envelope {
+    width: 90%;
+    max-width: 600px;
+    height: 350px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    padding: 20px;
+    overflow-y: auto;
+    animation: openLetter 1s ease forwards;
+}
+
+@keyframes openLetter {
+    from { transform: scaleY(0); }
+    to { transform: scaleY(1); }
+}
+
+@keyframes closeLetter {
+    from { transform: scaleY(1); }
+    to { transform: scaleY(0); }
+}
+
+#letterContent {
+    white-space: pre-wrap;
+    text-align: left;
+    line-height: 1.6;
+}
+
+/* ================= VIDEO ================= */
+
+#videoSection {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: black;
+    justify-content: center;
+    align-items: center;
+}
+
+video {
+    width: 100%;
+    height: auto;
+}
+</style>
+</head>
+<body>
+
+<div id="gameSection">
+    <h1>💖 Giải Ô Chữ Để Mở Thư 💖</h1>
+    <div class="subtitle">Ghép chữ đầu mỗi hàng để tìm ra từ bí mật ❤️</div>
+
+    <div class="board" id="board"></div>
+
+    <button onclick="checkAnswers()">Mở Khoá</button>
+</div>
+
+<div id="letterSection">
+    <div class="envelope" id="envelope">
+        <div id="letterContent"></div>
+    </div>
+</div>
+
+<div id="videoSection">
+    <video controls autoplay>
+        <source src="memory.mp4" type="video/mp4">
+    </video>
+</div>
+
+<script>
+const words = [
+    "TEDDY",
+    "ROSE",
+    "ANGEL",
+    "NIGHT",
+    "GIFT"
+];
+
+const hints = [
+    "1️⃣ Món quà bông mềm mềm các cặp đôi hay tặng 🧸",
+    "2️⃣ Loài hoa tượng trưng cho tình yêu 🌹",
+    "3️⃣ Người con gái như thiên thần 👼",
+    "4️⃣ Buổi tối hẹn hò lãng mạn 🌙",
+    "5️⃣ Thứ thường xuất hiện trong dịp đặc biệt 🎁"
+];
+
+const secret = "TRANG";
+const board = document.getElementById("board");
+
+function createBoard() {
+    words.forEach((word, index) => {
+
+        const container = document.createElement("div");
+        container.className = "row-container";
+
+        const hint = document.createElement("div");
+        hint.className = "hint";
+        hint.textContent = hints[index];
+
+        const row = document.createElement("div");
+        row.className = "row";
+
+        for (let i = 0; i < word.length; i++) {
+            const input = document.createElement("input");
+            input.maxLength = 1;
+
+            input.addEventListener("input", function() {
+                this.value = this.value.toUpperCase();
+                if (this.nextElementSibling) {
+                    this.nextElementSibling.focus();
+                }
+            });
+
+            input.addEventListener("keydown", function(e) {
+                if (e.key === "Backspace" && !this.value) {
+                    if (this.previousElementSibling) {
+                        this.previousElementSibling.focus();
+                    }
+                }
+            });
+
+            row.appendChild(input);
+        }
+
+        container.appendChild(hint);
+        container.appendChild(row);
+        board.appendChild(container);
+    });
+}
+
+function checkAnswers() {
+    let secretWord = "";
+    const rows = document.querySelectorAll(".row");
+
+    rows.forEach((row, index) => {
+        const inputs = row.querySelectorAll("input");
+        let guess = "";
+
+        inputs.forEach(input => {
+            guess += input.value.toUpperCase();
+        });
+
+        if (guess === words[index]) {
+            row.classList.add("correct");
+            secretWord += guess[0];
+        }
+    });
+
+    if (secretWord === secret) {
+        openLetter();
+    } else {
+        alert("Chưa đúng rồi ❤️");
+    }
+}
+
+function openLetter() {
+    document.getElementById("gameSection").style.display = "none";
+    const letterSection = document.getElementById("letterSection");
+    letterSection.style.display = "flex";
+
+    fetch("letter.txt")
+    .then(response => response.text())
+    .then(text => typeWriter(text));
+}
+
+function typeWriter(text) {
+    const content = document.getElementById("letterContent");
+    let i = 0;
+
+    const interval = setInterval(() => {
+        content.innerHTML += text.charAt(i);
+        i++;
+        if (i >= text.length) {
+            clearInterval(interval);
+            setTimeout(closeLetter, 4000);
+        }
+    }, 30);
+}
+
+function closeLetter() {
+    const envelope = document.getElementById("envelope");
+    envelope.style.animation = "closeLetter 1s forwards";
+
+    setTimeout(() => {
+        document.getElementById("letterSection").style.display = "none";
+        document.getElementById("videoSection").style.display = "flex";
+    }, 1000);
+}
+
+createBoard();
+</script>
+
+</body>
+</html>
