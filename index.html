@@ -18,7 +18,6 @@ body {
 }
 
 /* ===== VIDEO BACKGROUND ===== */
-
 #bgVideo {
     position: fixed;
     top: 0;
@@ -27,10 +26,10 @@ body {
     min-height: 100%;
     object-fit: cover;
     z-index: -1;
-    opacity: 0.75; /* 70-80% */
+    opacity: 0.75;
 }
 
-/* Overlay nhẹ cho chữ dễ đọc */
+/* Overlay cho chữ dễ đọc */
 .overlay {
     position: fixed;
     inset: 0;
@@ -39,15 +38,10 @@ body {
 }
 
 /* ===== GAME ===== */
-
 #gameSection {
     padding: 20px;
     position: relative;
     z-index: 2;
-}
-
-h1 {
-    margin-top: 20px;
 }
 
 .board {
@@ -89,14 +83,6 @@ input {
     text-transform: uppercase;
 }
 
-@media (min-width: 768px) {
-    input {
-        width: 55px;
-        height: 55px;
-        font-size: 20px;
-    }
-}
-
 .correct input {
     background: #ff4fa3;
     color: white;
@@ -114,7 +100,6 @@ button {
 }
 
 /* ===== LETTER ===== */
-
 #letterSection {
     display: none;
     position: relative;
@@ -149,8 +134,8 @@ button {
 </head>
 <body>
 
-<!-- Video background -->
-<video id="bgVideo" autoplay loop playsinline>
+<!-- VIDEO (KHÔNG autoplay) -->
+<video id="bgVideo" loop playsinline>
     <source src="memories.mp4" type="video/mp4">
 </video>
 
@@ -171,9 +156,8 @@ button {
 
 <script>
 const words = ["TRUST","RING","ANGEL","NOBLE","GLOW"];
-
 const hints = [
-"1️⃣ A strong belief in someone’s honesty or reliability ",
+"1️⃣ A strong belief in someone’s honesty or reliability",
 "2️⃣ A symbol of commitment and marriage",
 "3️⃣ You are my 👼",
 "4️⃣ Having high moral qualities - You",
@@ -245,14 +229,23 @@ function checkAnswers() {
     if (secretWord === secret) {
         openLetter();
     } else {
-        alert("Chưa đúng rồi bbi ơi❤️");
+        alert("Chưa đúng rồi bbi ơi ❤️");
     }
 }
 
 function openLetter() {
+
+    // Ẩn game
     document.getElementById("gameSection").style.display = "none";
     document.getElementById("letterSection").style.display = "block";
 
+    // 👉 PHÁT VIDEO SAU USER INTERACTION
+    const video = document.getElementById("bgVideo");
+    video.play().catch(error => {
+        console.log("Autoplay bị chặn:", error);
+    });
+
+    // Load nội dung thư
     fetch("letter.txt")
     .then(response => response.text())
     .then(text => typeWriter(text));
