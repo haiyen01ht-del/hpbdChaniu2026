@@ -11,25 +11,43 @@
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background: #ffd6e7; /* hồng nhạt */
+    background: #ffd6e7;
     color: #5a2a41;
     text-align: center;
     overflow-x: hidden;
 }
 
-/* ================= GAME ================= */
+/* ===== VIDEO BACKGROUND ===== */
+
+#bgVideo {
+    position: fixed;
+    top: 0;
+    left: 0;
+    min-width: 100%;
+    min-height: 100%;
+    object-fit: cover;
+    z-index: -1;
+    opacity: 0.75; /* 70-80% */
+}
+
+/* Overlay nhẹ cho chữ dễ đọc */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(255, 214, 231, 0.35);
+    z-index: -1;
+}
+
+/* ===== GAME ===== */
 
 #gameSection {
     padding: 20px;
+    position: relative;
+    z-index: 2;
 }
 
 h1 {
     margin-top: 20px;
-}
-
-.subtitle {
-    margin-bottom: 10px;
-    font-style: italic;
 }
 
 .board {
@@ -49,6 +67,9 @@ h1 {
 .hint {
     font-size: 14px;
     margin-bottom: 5px;
+    background: rgba(255,255,255,0.7);
+    padding: 6px 12px;
+    border-radius: 12px;
 }
 
 .row {
@@ -77,7 +98,7 @@ input {
 }
 
 .correct input {
-    background: #ff85b3;
+    background: #ff4fa3;
     color: white;
 }
 
@@ -88,43 +109,35 @@ button {
     border: none;
     font-weight: bold;
     cursor: pointer;
-    background: #ff85b3;
+    background: #ff4fa3;
     color: white;
 }
 
-/* ================= LETTER ================= */
+/* ===== LETTER ===== */
 
 #letterSection {
     display: none;
-    position: fixed;
-    inset: 0;
-    background: #fff0f6;
-    color: #5a2a41;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
+    position: relative;
+    z-index: 2;
+    margin-top: 40px;
 }
 
 .envelope {
     width: 90%;
     max-width: 600px;
     height: 350px;
+    margin: auto;
     background: white;
     border-radius: 12px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
     padding: 20px;
     overflow-y: auto;
     animation: openLetter 1s ease forwards;
 }
 
 @keyframes openLetter {
-    from { transform: scaleY(0); }
-    to { transform: scaleY(1); }
-}
-
-@keyframes closeLetter {
-    from { transform: scaleY(1); }
-    to { transform: scaleY(0); }
+    from { transform: scaleY(0); opacity:0; }
+    to { transform: scaleY(1); opacity:1; }
 }
 
 #letterContent {
@@ -132,62 +145,39 @@ button {
     text-align: left;
     line-height: 1.6;
 }
-
-/* ================= VIDEO ================= */
-
-#videoSection {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: black;
-    justify-content: center;
-    align-items: center;
-}
-
-video {
-    width: 100%;
-    height: auto;
-}
 </style>
 </head>
 <body>
 
+<!-- Video background -->
+<video id="bgVideo" autoplay loop playsinline>
+    <source src="memories.mp4" type="video/mp4">
+</video>
+
+<div class="overlay"></div>
+
 <div id="gameSection">
     <h1>💖 Giải Ô Chữ Để Mở Thư 💖</h1>
-    <div class="subtitle">Ghép chữ đầu mỗi hàng để tìm ra từ bí mật ❤️</div>
-
+    <p>Ghép chữ đầu mỗi hàng để tìm từ khoá trong tim Kiến ❤️</p>
     <div class="board" id="board"></div>
-
     <button onclick="checkAnswers()">Mở Khoá</button>
 </div>
 
 <div id="letterSection">
-    <div class="envelope" id="envelope">
+    <div class="envelope">
         <div id="letterContent"></div>
     </div>
 </div>
 
-<div id="videoSection">
-    <video controls autoplay>
-        <source src="memory_org.mp4" type="video/mp4">
-    </video>
-</div>
-
 <script>
-const words = [
-    "TEDDY",
-    "ROSE",
-    "ANGEL",
-    "NIGHT",
-    "GIFT"
-];
+const words = ["TRUST","RING","ANGEL","NOBLE","GLOW"];
 
 const hints = [
-    "1️⃣ teddy 🧸",
-    "2️⃣ rose 🌹",
-    "3️⃣ You are my 👼",
-    "4️⃣ night 🌙",
-    "5️⃣ What is this? 🎁"
+"1️⃣ A strong belief in someone’s honesty or reliability ",
+"2️⃣ A symbol of commitment and marriage",
+"3️⃣ You are my 👼",
+"4️⃣ Having high moral qualities - You",
+"5️⃣ Soft, warm light - You"
 ];
 
 const secret = "TRANG";
@@ -255,14 +245,13 @@ function checkAnswers() {
     if (secretWord === secret) {
         openLetter();
     } else {
-        alert("Chưa đúng rồi ❤️");
+        alert("Chưa đúng rồi bbi ơi❤️");
     }
 }
 
 function openLetter() {
     document.getElementById("gameSection").style.display = "none";
-    const letterSection = document.getElementById("letterSection");
-    letterSection.style.display = "flex";
+    document.getElementById("letterSection").style.display = "block";
 
     fetch("letter.txt")
     .then(response => response.text())
@@ -278,19 +267,8 @@ function typeWriter(text) {
         i++;
         if (i >= text.length) {
             clearInterval(interval);
-            setTimeout(closeLetter, 4000);
         }
     }, 30);
-}
-
-function closeLetter() {
-    const envelope = document.getElementById("envelope");
-    envelope.style.animation = "closeLetter 1s forwards";
-
-    setTimeout(() => {
-        document.getElementById("letterSection").style.display = "none";
-        document.getElementById("videoSection").style.display = "flex";
-    }, 1000);
 }
 
 createBoard();
